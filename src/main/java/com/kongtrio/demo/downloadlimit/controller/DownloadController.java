@@ -4,9 +4,7 @@ import com.kongtrio.demo.downloadlimit.inputstream.BandwidthLimiter;
 import com.kongtrio.demo.downloadlimit.inputstream.LimitInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -25,7 +23,7 @@ public class DownloadController {
     private static final Logger LOGGER = LoggerFactory.getLogger(DownloadController.class);
 
     @GetMapping("normal")
-    public void downloadFile(String file, HttpServletResponse response) throws Exception {
+		public void downloadFile(@RequestParam("file") String file,  HttpServletResponse response) throws Exception {
         FileInputStream fileInputStream = getFile(file, response);
         ServletOutputStream outputStream = null;
         try {
@@ -55,11 +53,15 @@ public class DownloadController {
      * @throws IOException
      */
     @GetMapping("/limit")
-    public void limitDownloadFile(String file, HttpServletResponse response) throws Exception {
+		public void limitDownloadFile(@RequestParam("file") String file, @RequestParam("maxRate") int maxRate,
+				HttpServletResponse response) throws Exception {
+			if (maxRate == 0) {
+				maxRate = 1024;
+			}
         FileInputStream fileInputStream = getFile(file, response);
         ServletOutputStream outputStream = null;
         try {
-            LimitInputStream limitInputStream = new LimitInputStream(fileInputStream, new BandwidthLimiter(1024));
+					LimitInputStream limitInputStream = new LimitInputStream(fileInputStream, new BandwidthLimiter(maxRate));
 
             long beginTime = System.currentTimeMillis();
             outputStream = response.getOutputStream();
