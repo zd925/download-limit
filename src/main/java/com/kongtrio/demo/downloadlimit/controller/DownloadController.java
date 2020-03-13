@@ -13,8 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 
 /**
- * @author yangjb
- * @since 2018-09-14 10:07
+ * @author DH
+ * @since 2020-03-09 09:14
  * <p>
  * 文件下载器
  */
@@ -25,18 +25,8 @@ public class DownloadController {
     private static final Logger LOGGER = LoggerFactory.getLogger(DownloadController.class);
 
     @GetMapping("normal")
-    public void downloadFile(String file, HttpServletResponse response) throws IOException {
-        LOGGER.info("download file");
-        if (file == null) {
-            file = "/tmp/test.txt";
-        }
-        File downloadFile = new File(file);
-        FileInputStream fileInputStream = new FileInputStream(downloadFile);
-
-        response.setContentType("application/x-msdownload;");
-        response.setHeader("Content-disposition", "attachment; filename=" + new String(downloadFile.getName()
-                .getBytes("utf-8"), "ISO8859-1"));
-        response.setHeader("Content-Length", String.valueOf(downloadFile.length()));
+    public void downloadFile(String file, HttpServletResponse response) throws Exception {
+        FileInputStream fileInputStream = getFile(file, response);
         ServletOutputStream outputStream = null;
         try {
             long beginTime = System.currentTimeMillis();
@@ -65,18 +55,8 @@ public class DownloadController {
      * @throws IOException
      */
     @GetMapping("/limit")
-    public void limitDownloadFile(String file, HttpServletResponse response) throws IOException {
-        LOGGER.info("download file");
-        if (file == null) {
-            file = "/tmp/test.txt";
-        }
-        File downloadFile = new File(file);
-        FileInputStream fileInputStream = new FileInputStream(downloadFile);
-
-        response.setContentType("application/x-msdownload;");
-        response.setHeader("Content-disposition", "attachment; filename=" + new String(downloadFile.getName()
-                .getBytes("utf-8"), "ISO8859-1"));
-        response.setHeader("Content-Length", String.valueOf(downloadFile.length()));
+    public void limitDownloadFile(String file, HttpServletResponse response) throws Exception {
+        FileInputStream fileInputStream = getFile(file, response);
         ServletOutputStream outputStream = null;
         try {
             LimitInputStream limitInputStream = new LimitInputStream(fileInputStream, new BandwidthLimiter(1024));
@@ -97,5 +77,20 @@ public class DownloadController {
             }
             LOGGER.info("download success!");
         }
+    }
+
+    private FileInputStream getFile(String file, HttpServletResponse response) throws Exception {
+        LOGGER.info("download file");
+        if (file == null) {
+            file = "/tmp/test.txt";
+        }
+        File downloadFile = new File(file);
+        FileInputStream fileInputStream = new FileInputStream(downloadFile);
+
+        response.setContentType("application/x-msdownload;");
+        response.setHeader("Content-disposition",
+            "attachment; filename=" + new String(downloadFile.getName().getBytes("utf-8"), "ISO8859-1"));
+        response.setHeader("Content-Length", String.valueOf(downloadFile.length()));
+        return fileInputStream;
     }
 }

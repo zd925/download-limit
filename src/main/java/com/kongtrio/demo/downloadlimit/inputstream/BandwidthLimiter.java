@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author yangjb
- * @since 2018-09-13 17:54
+ * @author DH
+ * @since 2020-03-10 14:13
  * <p>
  * 字节流限流器
  * 主要思想：

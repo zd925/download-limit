@@ -5,7 +5,7 @@ import java.io.OutputStream;
 
 /**
  * @author yangjb
- * @since 2019-02-28 19:21
+ * @since 2020-03-11 19:22
  * <p>
  * 限流的outputstream
  */

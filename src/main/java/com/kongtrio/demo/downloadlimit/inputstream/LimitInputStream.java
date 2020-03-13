@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @author yangjb
- * @since 2018-09-14 09:58
+ * @author DH
+ * @since 2020-03-09 10:11
  * <p>
  * 限流inputStream
  */
