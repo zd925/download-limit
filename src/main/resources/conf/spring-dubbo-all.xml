@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+	http://code.alibabatech.com/schema/dubbo  http://code.alibabatech.com/schema/dubbo/dubbo.xsd 
+	http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+	">
+
+	<dubbo:annotation package="uyun.ufs" />
+
+	<!-- 提供方应用信息，用于计算依赖关系 -->
+	<dubbo:application name="ufs_provider" />
+
+	<dubbo:protocol id="front-api" name="rest" port="${rest.port}" server="servlet" contextpath="${CONTEXT_PATH}"
+		 extension="uyun.ufs.main.extension.SecurityControlFilter,
+		 			uyun.ufs.main.extension.HttpRestApiFilter,
+		 			uyun.ufs.main.extension.SecurityControlAfterFilter,
+    				uyun.ufs.main.extension.ReaderExceptionMapper,
+    				uyun.ufs.main.extension.IllegalArgumentExceptionMapper,
+					uyun.ufs.main.extension.CommonExceptionMapper,
+    				uyun.ufs.main.extension.ValidationExceptionMapper,
+    				uyun.ufs.main.extension.JsonObjectMapperProvider" />
+
+
+	<!-- 使用multicast广播注册中心暴露服务地址 -->
+	<dubbo:registry protocol="zookeeper" address="${dubbo.registry.address}"  client="curator" timeout="30000"/>
+	<dubbo:protocol name="dubbo" port="${mgr.dubbo.protocol.port:7094}" serialization="kryo"/>
+   	
+   	<dubbo:service interface="uyun.tenant.serviceapi.acl.OperationServiceApi" ref="operationServiceImpl" group="${product.productNum}" protocol="dubbo"/>
+    <dubbo:service interface="uyun.tenant.serviceapi.acl.CategoryServiceApi"  ref="categoryServiceImpl" group="${product.productNum}" protocol="dubbo"/>
+   	<dubbo:service interface="uyun.tenant.serviceapi.acl.DataPrivilegeServiceApi" ref="dataPrivilegeServiceImpl" group="${product.productNum}" protocol="dubbo"/>
+	
+	<task:scheduler id="scheduler" pool-size="10" />
+	<task:scheduled-tasks scheduler="scheduler">
+		<!-- 清理被打上删除表示的文件 -->
+        <task:scheduled ref="fileCleanTask" method="cleanFile"  cron="0 0 0/8 * * ?" /> 
+        <task:scheduled ref="tempFileCleanTask" method="clean"  cron="0 0 0/12 * * ?" /> 
+        <task:scheduled ref="midFileCleanTask" method="clean"  cron="0 0 1 * * ?" />
+    </task:scheduled-tasks>
+</beans>  

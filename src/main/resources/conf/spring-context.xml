@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+
+    <context:annotation-config />
+	<import resource="classpath:/disconf.xml" />
+	<import resource="spring-mybatis.xml" />
+	<import resource="spring-redis.xml" />
+	<import resource="classpath:/tenant-dubbo-consumer.xml" /> <!--  租户 -->
+	<import resource="classpath:/notify-dubbo-consumer.xml" /> <!--  通知 -->
+
+	<bean class="uyun.ufs.common.util.BeanContext"></bean>
+	<bean class="uyun.ufs.common.zk.ZookeeperFactory">
+		<property name="zkHosts" value="${dubbo.registry.address}"></property>
+		<property name="namespace" value="ufs"/>
+	</bean>
+	
+	<!-- 国际化资源文件 -->
+	<bean id="messageSource"
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+			<property name="basenames">    
+                <list>    
+                   <value>file:conf/i18n/messages</value>    
+               </list>    
+           </property> 
+	</bean>
+
+	<import resource="spring-dubbo-all.xml" />
+</beans>

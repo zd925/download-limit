@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+	http://code.alibabatech.com/schema/dubbo  http://code.alibabatech.com/schema/dubbo/dubbo.xsd 
+	http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+	">
+
+ 	<context:annotation-config />
+	<import resource="classpath:/disconf.xml" />
+	<import resource="spring-mybatis.xml" />
+	
+	<dubbo:application name="ufs_db_init" />
+	<dubbo:registry protocol="zookeeper" address="${dubbo.registry.address}"  client="curator" timeout="30000"/>
+	
+	<import resource="classpath:/tenant-dubbo-consumer.xml" />
+	<bean id="appLogicImpl" class="uyun.ufs.tenant.logic.impl.AppLogicImpl"></bean>
+	<bean id="tenantLogicImpl" class="uyun.ufs.tenant.logic.impl.TenantLogicImpl"></bean>
+	<bean id="productLogicImpl" class="uyun.ufs.tenant.logic.impl.ProductLogicImpl"></bean>
+	<bean id="roleLogicImpl" class="uyun.ufs.tenant.logic.impl.RoleLogicImpl"></bean>
+	<bean id="roleManageLogicImpl" class="uyun.ufs.tenant.logic.impl.RoleManageLogicImpl"></bean>
+	<bean id="groupLogicImpl" class="uyun.ufs.tenant.logic.impl.GroupLogicImpl"></bean>
+	<bean id="beanContext" class="uyun.ufs.common.util.BeanContext"></bean>
+
+	<!-- 国际化资源文件 -->
+	<bean id="messageSource"
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+			<property name="basenames">    
+                <list>    
+                   <value>file:conf/i18n/messages</value>    
+               </list>    
+           </property> 
+	</bean>
+
+	<bean id="versionDao" class="uyun.bird.dbversion.dao.ibatis.SqlMapVersionDao">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	
+	<bean id="sqlresource" class="org.springframework.core.io.FileSystemResource">
+		<constructor-arg index="0">
+			<value>script/db/database.sql</value>
+		</constructor-arg>
+	</bean>
+
+  
+    <bean id="versionManager" class="uyun.bird.dbversion.logic.enhanced.VersionManagerImpl">
+		<constructor-arg>
+			<bean id="configParameter" class="uyun.bird.dbversion.entity.ConfigParameter">
+				<constructor-arg index="0">
+					<value>ufs</value>
+				</constructor-arg>
+				<constructor-arg>
+					<bean factory-bean="sqlresource" factory-method="getFile" />
+				</constructor-arg>
+			</bean>
+		</constructor-arg>  
+		<constructor-arg ref="versionDao"></constructor-arg>  
+		<constructor-arg ref="sqlresource"></constructor-arg>  
+	</bean>
+
+</beans>  
